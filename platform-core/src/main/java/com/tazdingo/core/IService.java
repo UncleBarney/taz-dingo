@@ -1,7 +1,4 @@
-package edu.neu.coe.platform.core.platform.Service;
-
-import edu.neu.coe.platform.core.platform.Response;
-import edu.neu.coe.platform.core.platform.workrequest.WorkRequest;
+package com.tazdingo.core;
 
 /**
  *
@@ -16,5 +13,4 @@ public interface IService {
      * @return
      */
     public Response takeRequest(WorkRequest request);
-    
 }

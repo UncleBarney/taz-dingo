@@ -1,4 +1,4 @@
-package edu.neu.coe.platform.core.platform.workrequest;
+package com.tazdingo.core;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,5 +24,4 @@ public class WorkQueue {
         workrequestmap.remove(sessionid);
         return request;
     }
-    
 }

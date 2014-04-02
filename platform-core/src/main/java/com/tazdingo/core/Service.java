@@ -1,8 +1,4 @@
-package edu.neu.coe.platform.core.platform.Service;
-
-import edu.neu.coe.platform.core.platform.Response;
-import edu.neu.coe.platform.core.platform.workrequest.WorkQueue;
-import edu.neu.coe.platform.core.platform.workrequest.WorkRequest;
+package com.tazdingo.core;
 
 /**
  *
@@ -14,7 +10,7 @@ public abstract class Service implements IService {
 
     public Service() {
     }
-    
+
     /**
      * Method to pull work request and return response
      *
@@ -34,5 +30,4 @@ public abstract class Service implements IService {
      * @return
      */
     public abstract Response excuteRequest(String sessionid);
-    
 }

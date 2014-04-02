@@ -1,4 +1,4 @@
-package edu.neu.coe.platform.core.platform;
+package com.tazdingo.core;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -24,9 +24,9 @@ public class Request {
 
     public Request(HttpServletRequest request) {
         data = new HashMap<>();
-        
+
         @SuppressWarnings("unchecked")
-		Enumeration<String> enu = request.getParameterNames();
+        Enumeration<String> enu = request.getParameterNames();
         while (enu.hasMoreElements()) {
             String key = enu.nextElement();
             data.put(key, request.getParameter(key));
@@ -46,7 +46,7 @@ public class Request {
     }
 
     public List<NameValuePair> getParameterPair() {
-        List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+        List<NameValuePair> pairs = new ArrayList<>();
         Iterator<Entry<String, String>> iterator = data.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next();
@@ -54,5 +54,4 @@ public class Request {
         }
         return pairs;
     }
-    
 }

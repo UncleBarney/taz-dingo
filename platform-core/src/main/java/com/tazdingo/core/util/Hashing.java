@@ -1,17 +1,18 @@
-package edu.neu.coe.platform.core.util.hashing;
+package com.tazdingo.core.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.commons.codec.binary.Base64;
+
 /**
  *
  * @author apple
  */
-public class HashUtilImpl {
+public class Hashing {
 
     public enum HashingTechqniue {
+
         SSHA256("SHA-256"), MD5("MD5");
         private final String value;
 
@@ -41,35 +42,17 @@ public class HashUtilImpl {
     }
 
     public static byte[] base64StringToByte(String input) {
-        try {
-            if (input == null || input.isEmpty()) {
-                return null;
-            }
-
-            //JAVA Sun Misc Base64Decoder has limited support
-            //Using personalized Base64Coder.
-            
-            //BASE64Decoder decoder = new BASE64Decoder();
-            //return decoder.decodeBuffer(input);
-            return Base64Coder.decode(input);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(HashUtilImpl.class.getName()).log(Level.SEVERE, null, ex);
+        if (input == null || input.isEmpty()) {
+            return null;
         }
-        return null;
+        return Base64.decodeBase64(input);
     }
 
     public static String bytetoBase64String(byte[] input) {
         if (input == null) {
             return null;
         }
-        //JAVA Sun Misc Base64Decoder has limited support
-        //Using personalized Base64Coder.
-        
-        //BASE64Encoder endecoder = new BASE64Encoder();
-        //return endecoder.encode(input);
-        
-        return new String(Base64Coder.encode(input));
-        
+        return Base64.encodeBase64String(input);
     }
 
     public static byte[] generateSalt() {
@@ -98,5 +81,4 @@ public class HashUtilImpl {
     public static String getSessionKey() {
         return bytetoBase64String(generateSalt());
     }
-    
 }

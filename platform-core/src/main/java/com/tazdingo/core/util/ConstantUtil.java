@@ -1,4 +1,4 @@
-package edu.neu.coe.platform.core.util;
+package com.tazdingo.core.util;
 
 /**
  *

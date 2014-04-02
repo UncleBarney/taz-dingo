@@ -1,4 +1,4 @@
-package edu.neu.coe.platform.core.platform;
+package com.tazdingo.core;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
-import edu.neu.coe.platform.core.util.ConstantUtil;
+import com.tazdingo.core.util.ConstantUtil;
 
 import org.apache.http.HttpResponse;
 
@@ -78,5 +78,4 @@ public class Response {
         }
         return response;
     }
-    
 }

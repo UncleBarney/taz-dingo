@@ -1,7 +1,5 @@
-package edu.neu.coe.platform.core.util.encryption;
+package com.tazdingo.core.util;
 
-import edu.neu.coe.platform.core.util.ConstantUtil;
-import edu.neu.coe.platform.core.util.hashing.HashUtilImpl;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -25,18 +23,17 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author apple
  */
-public class EncryptionUtilImpl implements IEncryptionUtil {
+public class Encryption {
 
     private static final String UNICODE_FORMAT = "UTF-8";
     private static final String AES_ENCRYPTION_SCHEME = "AES/CBC/PKCS5Padding";
-    private final byte[] IV = new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+    private static final byte[] IV = new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
         0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-    private final byte[] SALT = new byte[]{72, 34, 1, -98, 41, 68, -55, 34};
-    private final int KEY_LENGTH = 128;
-    private final int ITERATION_COUNT = 65536;
+    private static final byte[] SALT = new byte[]{72, 34, 1, -98, 41, 68, -55, 34};
+    private static final int KEY_LENGTH = 128;
+    private static final int ITERATION_COUNT = 65536;
 
-    @Override
-    public SecretKey generateSecretKey(String encryptionKey) {
+    public static SecretKey generateSecretKey(String encryptionKey) {
         if (encryptionKey == null || encryptionKey.isEmpty()) {
             return null;
         }
@@ -52,8 +49,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
         return secretKey;
     }
 
-    @Override
-    public SecretKey generateSecretKeyFromBytes(byte[] keyBytes) {
+    public static SecretKey generateSecretKeyFromBytes(byte[] keyBytes) {
         SecretKey secretKey = new SecretKeySpec(keyBytes, "AES");
         return secretKey;
     }
@@ -65,8 +61,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
      * @param input
      * @return
      */
-    @Override
-    public String encrypt(SecretKey key, String input) {
+    public static String encrypt(SecretKey key, String input) {
         if (input == null || key == null || input.isEmpty()) {
             return null;
         }
@@ -77,15 +72,14 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
             String data = input;
             byte[] plainText = data.getBytes(UNICODE_FORMAT);
             byte[] cipherBytes = cipher.doFinal(plainText);
-            encryptedInput = HashUtilImpl.bytetoBase64String(cipherBytes);
+            encryptedInput = Hashing.bytetoBase64String(cipherBytes);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | UnsupportedEncodingException | IllegalBlockSizeException | BadPaddingException e) {
             return null;
         }
         return encryptedInput;
     }
 
-    @Override
-    public Map<String, String> encrypt(SecretKey key, Map<String, String> dataMap) {
+    public static Map<String, String> encrypt(SecretKey key, Map<String, String> dataMap) {
         if (key == null || dataMap == null) {
             return null;
         }
@@ -104,7 +98,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
                     if (data != null && !data.isEmpty()) {
                         byte[] plainText = data.getBytes(UNICODE_FORMAT);
                         byte[] cipherBytes = cipher.doFinal(plainText);
-                        encData.put(mapKey, HashUtilImpl.bytetoBase64String(cipherBytes));
+                        encData.put(mapKey, Hashing.bytetoBase64String(cipherBytes));
                     } else {
                         encData.put(mapKey, data);
                     }
@@ -123,8 +117,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
      * @param input
      * @return
      */
-    @Override
-    public String decrypt(SecretKey key, String input) {
+    public static String decrypt(SecretKey key, String input) {
         if (input == null || key == null || input.isEmpty()) {
             return null;
         }
@@ -136,7 +129,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
             byte[] encryptedText = null;
             byte[] plainText = null;
             if (data != null && !data.isEmpty()) {
-                encryptedText = HashUtilImpl.base64StringToByte(data);
+                encryptedText = Hashing.base64StringToByte(data);
                 plainText = cipher.doFinal(encryptedText);
                 decryptedInput = new String(plainText);
             } else {
@@ -148,8 +141,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
         return decryptedInput;
     }
 
-    @Override
-    public Map<String, String> decrypt(SecretKey key, Map<String, String> encData) {
+    public static Map<String, String> decrypt(SecretKey key, Map<String, String> encData) {
         if (key == null || encData == null) {
             return null;
         }
@@ -168,7 +160,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
                     mapKey = iterator.next();
                     value = encData.get(mapKey);
                     if (value != null && !value.isEmpty() && !value.equals("null")) {
-                        encryptedText = HashUtilImpl.base64StringToByte(value);
+                        encryptedText = Hashing.base64StringToByte(value);
                         plainText = cipher.doFinal(encryptedText);
                         decData.put(mapKey, new String(plainText));
                     } else {
@@ -186,8 +178,7 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
         return null;
     }
 
-    @Override
-    public boolean validateDecryptedAttributes(String... attributes) {
+    public static boolean validateDecryptedAttributes(String... attributes) {
         if (attributes == null) {
             return false;
         }
@@ -200,19 +191,16 @@ public class EncryptionUtilImpl implements IEncryptionUtil {
         return true;
     }
 
-    @Override
-    public SecretKey stringToKey(String string) {
+    public static SecretKey stringToKey(String string) {
         if (string == null) {
             return null;
         }
-        byte[] encodedKey = HashUtilImpl.base64StringToByte(string);
+        byte[] encodedKey = Hashing.base64StringToByte(string);
         SecretKey originalKey = new SecretKeySpec(encodedKey, 0, encodedKey.length, "AES");
         return originalKey;
     }
 
-    @Override
-    public String keyToString(SecretKey key) {
-        return HashUtilImpl.bytetoBase64String(key.getEncoded());
+    public static String keyToString(SecretKey key) {
+        return Hashing.bytetoBase64String(key.getEncoded());
     }
-    
 }
