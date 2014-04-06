@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+--><root>
+<platform>
+        <name>platform</name>
+        <defaultkeyserverurl>ec2-54-186-113-251.us-west-2.compute.amazonaws.com:8080/keyserver/</defaultkeyserverurl>
+        <defaultkeyservername>keyserver</defaultkeyservername>
+</platform>
+<service>
+        <url>ec2-54-186-113-251.us-west-2.compute.amazonaws.com:8080/service/</url>
+        <name>service</name>
+        <privilege>1</privilege>
+        <keyservername>keyserver</keyservername>
+    </service>
+<device>
+        <id>device</id>
+        <privilege>1</privilege>
+        <keyservername>keyserver</keyservername>
+    </device>
+<user>
+        <name>user</name>
+        <privilege>1</privilege>
+        <keyservername>keyserver</keyservername>
+    </user>
+<!--    <blocked>
+        <blockeddeviceid/>
+    </blocked>-->
+<keyserver>
+<name>keyserver</name>
+<privilege/>
+<url>ec2-54-186-113-251.us-west-2.compute.amazonaws.com:8080/keyserver/</url>
+</keyserver>
+</root>

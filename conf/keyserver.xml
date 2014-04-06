@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+--><root>
+<keyserver>
+        <name>keyserver</name>
+        <platformurl>ec2-54-186-113-251.us-west-2.compute.amazonaws.com:8080/platform/</platformurl>
+		<defaultplatformname>platform</defaultplatformname>
+        <keystorefilesdirectory>D:/keystorefile</keystorefilesdirectory>
+</keyserver>
+<platform>
+        <name>platform</name>
+        <privilege>1</privilege>
+    </platform>
+</root>
