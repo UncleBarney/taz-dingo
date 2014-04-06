@@ -12,12 +12,12 @@ import java.util.logging.Logger;
 
 import javax.crypto.SecretKey;
 
-import com.tazdingo.platform.KeyServerRequestAPI.KDCAuthenticationAPI;
 import com.tazdingo.platform.KeyServerRequestAPI.KeyRequestAPI;
-import com.tazdingo.platform.KeyServerRequestAPI.TGSAuthorizationAPI;
 import com.tazdingo.platform.Platform;
 import com.tazdingo.core.Request;
 import com.tazdingo.core.Response;
+import com.tazdingo.requestAPI.KDCAuthenticationAPI;
+import com.tazdingo.requestAPI.TGSAuthorizationAPI;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

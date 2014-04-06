@@ -1,5 +1,6 @@
 package com.tazdingo.platform.service;
 
+import com.tazdingo.kerberos.KDC;
 import com.tazdingo.core.util.ConstantUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +8,9 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import com.tazdingo.platform.keymanager.IKeyManager;
 import com.tazdingo.platform.ticket.DeviceTGT;
-import com.tazdingo.platform.ticket.TGT;
+import com.tazdingo.ticket.TGT;
 import com.tazdingo.platform.ticket.ServiceTGT;
-import com.tazdingo.platform.ticket.ServiceTicket;
+import com.tazdingo.ticket.ServiceTicket;
 import com.tazdingo.platform.ticket.UseTGT;
 import com.tazdingo.platform.workrequest.PlatformWorkRequest;
 import com.tazdingo.core.WorkRequest;

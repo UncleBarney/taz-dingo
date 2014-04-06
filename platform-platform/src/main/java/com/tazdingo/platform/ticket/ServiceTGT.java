@@ -1,5 +1,6 @@
 package com.tazdingo.platform.ticket;
 
+import com.tazdingo.ticket.TGT;
 import com.tazdingo.core.util.ConstantUtil;
 
 /**

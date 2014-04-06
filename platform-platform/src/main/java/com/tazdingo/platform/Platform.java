@@ -3,7 +3,6 @@ package com.tazdingo.platform;
 import com.tazdingo.http.IPlatform;
 import com.tazdingo.core.Response;
 import com.tazdingo.core.Request;
-import java.io.IOException;
 import com.tazdingo.core.WorkQueue;
 import com.tazdingo.core.util.ConstantUtil;
 import java.util.Map;
@@ -12,15 +11,6 @@ import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import com.tazdingo.platform.session.DeviceSession;
 import com.tazdingo.platform.session.ISession;
 import com.tazdingo.platform.session.ISessionManager;
@@ -29,6 +19,7 @@ import com.tazdingo.platform.session.UserSession;
 import com.tazdingo.platform.service.ControlService;
 import com.tazdingo.core.IService;
 import com.tazdingo.core.util.Encryption;
+import static com.tazdingo.platform.AbstractPlatformConfig.getPlatformConfig;
 import com.tazdingo.platform.service.PlatformKDC;
 import com.tazdingo.platform.service.PlatformTGS;
 import com.tazdingo.platform.session.ServiceSession;
@@ -37,10 +28,10 @@ import com.tazdingo.platform.devicemanager.IDeviceManager;
 import com.tazdingo.platform.keymanager.IKeyManager;
 import com.tazdingo.platform.keymanager.KeyManagerImpl;
 import com.tazdingo.platform.workrequest.PlatformWorkRequest;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import java.util.List;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
 
 /**
  *
@@ -260,47 +251,40 @@ public class Platform implements IPlatform {
     @Override
     public void addUser(String username, String privilege, String keyservername) {
         addAccount(username, ConstantUtil.USER, privilege, keyservername);
-        Document doc = getFile();
         boolean change = false;
         boolean exist = false;
-        NodeList sublist = doc.getElementsByTagName("user");
-        if (sublist.getLength() > 0) {
-            for (int i = 0; i < sublist.getLength(); i++) {
-                Element e = (Element) sublist.item(i);
-                String name = e.getElementsByTagName("name").item(0).getTextContent();
-                if (name.equals(username)) {
-                    exist = true;
-                    Element ekeyservername = (Element) e.getElementsByTagName("keyservername").item(0);
-                    if (!ekeyservername.getTextContent().equals(keyservername)) {
-                        ekeyservername.setTextContent(keyservername);
-                        change = true;
-                    }
-                    Element eprivilege = (Element) e.getElementsByTagName("privilege").item(0);
-                    if (eprivilege.getTextContent().equals(privilege)) {
-                        eprivilege.setTextContent(privilege);
-                        change = true;
-                    }
-                    break;
-                }
+        XMLConfiguration config=getPlatformConfig();
+         List<HierarchicalConfiguration> user = config.configurationsAt("user");
+            for(HierarchicalConfiguration sub : user){
+                 String name = sub.getString("name");
+                 String oldprivilege = sub.getString("privilege");
+                 String oldkeyservername = sub.getString("keyservername");
+                 if(name.equals(username)){
+                     exist=true;
+                     if(!oldprivilege.equals(privilege)){
+                         sub.setProperty("privilege", privilege);
+                         change=true;
+                     }
+                     if(!oldkeyservername.equals(keyservername)){
+                         sub.setProperty("keyservername", keyservername);
+                         change=true;
+                     }
+                     break;
+                 }
             }
-        }
+       
         if (!exist) {
-            NodeList nlist = doc.getElementsByTagName("root");
-            Element user = doc.createElement("user");
-            Element name = doc.createElement("name");
-            name.appendChild(doc.createTextNode(username));
-            Element eprivilege = doc.createElement("privilege");
-            eprivilege.appendChild(doc.createTextNode(privilege));
-            Element ekeyservername = doc.createElement("keyservername");
-            ekeyservername.appendChild(doc.createTextNode(keyservername));
-            user.appendChild(name);
-            user.appendChild(eprivilege);
-            user.appendChild(ekeyservername);
-            nlist.item(0).appendChild(user);
+            config.addProperty("user(-1).name", username);
+            config.addProperty("user.privilege", privilege);
+            config.addProperty("user.keyservername", keyservername); 
             change = true;
         }
         if (change) {
-            saveToFile(doc);
+            try {
+                config.save();
+            } catch (ConfigurationException ex) {
+                Logger.getLogger(Platform.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
     }
@@ -326,48 +310,42 @@ public class Platform implements IPlatform {
     @Override
     public void addDevice(String deviceid, String privilege, String keyservername) {
         addAccount(deviceid, ConstantUtil.DEVICE, privilege, keyservername);
-        Document doc = getFile();
         boolean change = false;
         boolean exist = false;
-        NodeList sublist = doc.getElementsByTagName("device");
-        if (sublist.getLength() > 0) {
-            for (int i = 0; i < sublist.getLength(); i++) {
-                Element e = (Element) sublist.item(i);
-                String id = e.getElementsByTagName("id").item(0).getTextContent();
-                if (id.equals(deviceid)) {
-                    exist = true;
-                    Element ekeyservername = (Element) e.getElementsByTagName("keyservername").item(0);
-                    if (!ekeyservername.getTextContent().equals(keyservername)) {
-                        ekeyservername.setTextContent(keyservername);
-                        change = true;
-                    }
-                    Element eprivilege = (Element) e.getElementsByTagName("privilege").item(0);
-                    if (eprivilege.getTextContent().equals(privilege)) {
-                        eprivilege.setTextContent(privilege);
-                        change = true;
-                    }
-                    break;
-                }
+        XMLConfiguration config=getPlatformConfig();
+         List<HierarchicalConfiguration> device = config.configurationsAt("device");
+            for(HierarchicalConfiguration sub : device){
+                 String id = sub.getString("id");
+                 String oldprivilege = sub.getString("privilege");
+                 String oldkeyservername = sub.getString("keyservername");
+                 if(id.equals(deviceid)){
+                     exist=true;
+                     if(!oldprivilege.equals(privilege)){
+                         sub.setProperty("privilege", privilege);
+                         change=true;
+                     }
+                     if(!oldkeyservername.equals(keyservername)){
+                         sub.setProperty("keyservername", keyservername);
+                         change=true;
+                     }
+                     break;
+                 }
             }
-        }
+       
         if (!exist) {
-            NodeList nlist = doc.getElementsByTagName("root");
-            Element device = doc.createElement("device");
-            Element id = doc.createElement("id");
-            id.appendChild(doc.createTextNode(deviceid));
-            Element eprivilege = doc.createElement("privilege");
-            eprivilege.appendChild(doc.createTextNode(privilege));
-            Element ekeyservername = doc.createElement("keyservername");
-            ekeyservername.appendChild(doc.createTextNode(keyservername));
-            device.appendChild(id);
-            device.appendChild(eprivilege);
-            device.appendChild(ekeyservername);
-            nlist.item(0).appendChild(device);
+            config.addProperty("device(-1).id", deviceid);
+            config.addProperty("device.privilege", privilege);
+            config.addProperty("device.keyservername", keyservername); 
             change = true;
         }
         if (change) {
-            saveToFile(doc);
+            try {
+                config.save();
+            } catch (ConfigurationException ex) {
+                Logger.getLogger(Platform.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+        
     }
 
     /**
@@ -393,56 +371,47 @@ public class Platform implements IPlatform {
     public void addService(String servicename, String serviceurl, String privilege, String keyservername) {
         addAccount(servicename, ConstantUtil.SERVICE, privilege, keyservername);
         addServiceURL(servicename, serviceurl);
-        Document doc = getFile();
         boolean change = false;
         boolean exist = false;
-        NodeList sublist = doc.getElementsByTagName("service");
-        if (sublist.getLength() > 0) {
-            for (int i = 0; i < sublist.getLength(); i++) {
-                Element e = (Element) sublist.item(i);
-                String name = e.getElementsByTagName("name").item(0).getTextContent();
-                if (name.equals(servicename)) {
-                    Element url = (Element) e.getElementsByTagName("url").item(0);
-                    exist = true;
-                    Element ekeyservername = (Element) e.getElementsByTagName("keyservername").item(0);
-                    if (!ekeyservername.getTextContent().equals(keyservername)) {
-                        ekeyservername.setTextContent(keyservername);
-                        change = true;
-                    }
-                    if (!url.getTextContent().equals(serviceurl)) {
-                        url.setTextContent(serviceurl);
-                        change = true;
-                    }
-                    Element eprivilege = (Element) e.getElementsByTagName("privilege").item(0);
-                    if (eprivilege.getTextContent().equals(privilege)) {
-                        eprivilege.setTextContent(privilege);
-                        change = true;
-                    }
-                    break;
-                }
+        XMLConfiguration config=getPlatformConfig();
+         List<HierarchicalConfiguration> service = config.configurationsAt("service");
+            for(HierarchicalConfiguration sub : service){
+                 String name = sub.getString("name");
+                 String oldprivilege = sub.getString("privilege");
+                 String oldkeyservername = sub.getString("keyservername");
+                 String oldurl=sub.getString("url");
+                 if(name.equals(servicename)){
+                     exist=true;
+                     if(!oldprivilege.equals(privilege)){
+                         sub.setProperty("privilege", privilege);
+                         change=true;
+                     }
+                     if(!oldkeyservername.equals(keyservername)){
+                         sub.setProperty("keyservername", keyservername);
+                         change=true;
+                     }
+                     if(!oldurl.equals(serviceurl)){
+                         sub.setProperty("url", serviceurl);
+                     }
+                     break;
+                 }
             }
-        }
+       
         if (!exist) {
-            NodeList nlist = doc.getElementsByTagName("root");
-            Element service = doc.createElement("service");
-            Element name = doc.createElement("name");
-            name.appendChild(doc.createTextNode(servicename));
-            Element eprivilege = doc.createElement("privilege");
-            eprivilege.appendChild(doc.createTextNode(privilege));
-            Element url = doc.createElement("url");
-            url.appendChild(doc.createTextNode(serviceurl));
-            Element ekeyservername = doc.createElement("keyservername");
-            ekeyservername.appendChild(doc.createTextNode(keyservername));
-            service.appendChild(name);
-            service.appendChild(eprivilege);
-            service.appendChild(url);
-            service.appendChild(ekeyservername);
-            nlist.item(0).appendChild(service);
+            config.addProperty("service(-1).name", servicename);
+            config.addProperty("service.privilege", privilege);
+            config.addProperty("service.keyservername", keyservername);
+            config.addProperty("service.url", serviceurl);
             change = true;
         }
         if (change) {
-            saveToFile(doc);
+            try {
+                config.save();
+            } catch (ConfigurationException ex) {
+                Logger.getLogger(Platform.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+        
     }
 
     /**
@@ -469,48 +438,42 @@ public class Platform implements IPlatform {
         ((PlatformKDC) kdc).addAccount(ConstantUtil.KEYSERVER, keyservername);
         ((PlatformTGS) tgs).addAccount(ConstantUtil.KEYSERVER, keyservername, privilege);
         keymanager.addkeyserver(keyservername, keyserverurl);
-        Document doc = getFile();
         boolean change = false;
         boolean exist = false;
-        NodeList sublist = doc.getElementsByTagName("keyserver");
-        if (sublist.getLength() > 0) {
-            for (int i = 0; i < sublist.getLength(); i++) {
-                Element e = (Element) sublist.item(i);
-                String name = e.getElementsByTagName("name").item(0).getTextContent();
-                if (name.equals(keyservername)) {
-                    Element url = (Element) e.getElementsByTagName("url").item(0);
-                    exist = true;
-                    if (!url.getTextContent().equals(keyserverurl)) {
-                        url.setTextContent(keyserverurl);
-                        change = true;
-                    }
-                    Element eprivilege = (Element) e.getElementsByTagName("privilege").item(0);
-                    if (eprivilege.getTextContent().equals(privilege)) {
-                        eprivilege.setTextContent(privilege);
-                        change = true;
-                    }
-                    break;
-                }
+        XMLConfiguration config=getPlatformConfig();
+         List<HierarchicalConfiguration> keyserver = config.configurationsAt("keyserver");
+            for(HierarchicalConfiguration sub : keyserver){
+                 String name = sub.getString("name");
+                 String oldprivilege = sub.getString("privilege");
+                 String oldurl = sub.getString("url");
+                 if(name.equals(keyservername)){
+                     exist=true;
+                     if(!oldprivilege.equals(privilege)){
+                         sub.setProperty("privilege", privilege);
+                         change=true;
+                     }
+                     if(!oldurl.equals(keyserverurl)){
+                         sub.setProperty("url", keyserverurl);
+                         change=true;
+                     }
+                     break;
+                 }
             }
-        }
+       
         if (!exist) {
-            NodeList nlist = doc.getElementsByTagName("root");
-            Element keyserver = doc.createElement("keyserver");
-            Element name = doc.createElement("name");
-            name.appendChild(doc.createTextNode(keyservername));
-            Element eprivilege = doc.createElement("privilege");
-            eprivilege.appendChild(doc.createTextNode(privilege));
-            Element url = doc.createElement("url");
-            url.appendChild(doc.createTextNode(keyserverurl));
-            keyserver.appendChild(name);
-            keyserver.appendChild(eprivilege);
-            keyserver.appendChild(url);
-            nlist.item(0).appendChild(keyserver);
+            config.addProperty("keyserver(-1).name", keyservername);
+            config.addProperty("keyserver.privilege", privilege);
+            config.addProperty("keyserver.url", keyserverurl); 
             change = true;
         }
         if (change) {
-            saveToFile(doc);
+            try {
+                config.save();
+            } catch (ConfigurationException ex) {
+                Logger.getLogger(Platform.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+        
 
     }
 
@@ -525,31 +488,4 @@ public class Platform implements IPlatform {
         return response.convertToHttpResponse(httpresponse);
     }
 
-    private Document getFile() {
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse("./src/platform.xml");
-            doc.getDocumentElement().normalize();
-            return doc;
-        } catch (ParserConfigurationException | SAXException | IOException ex) {
-            Logger.getLogger(Platform.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-
-    }
-
-    private void saveToFile(Document doc) {
-        try {
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult("./src/platform.xml");
-            transformer.transform(source, result);
-        } catch (TransformerConfigurationException ex) {
-            Logger.getLogger(Platform.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (TransformerException ex) {
-            Logger.getLogger(Platform.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 }

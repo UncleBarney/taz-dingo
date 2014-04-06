@@ -13,7 +13,7 @@ import com.tazdingo.platform.Platform;
 import com.tazdingo.core.Request;
 import com.tazdingo.core.Response;
 import com.tazdingo.platform.keymanager.IKeyManager;
-import com.tazdingo.platform.ticket.ServiceTicket;
+import com.tazdingo.ticket.ServiceTicket;
 import com.tazdingo.platform.workrequest.PlatformWorkRequest;
 import com.tazdingo.core.WorkRequest;
 import com.tazdingo.core.util.Encryption;
