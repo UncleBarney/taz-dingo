@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<root>
+	<device>
+		<id>device</id>
+		<platformurl>http://localhost:8080/platform/</platformurl>
+	</device>
+</root>

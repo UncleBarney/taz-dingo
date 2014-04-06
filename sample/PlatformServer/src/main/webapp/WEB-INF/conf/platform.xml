@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<root>
+<platform>
+		<name>platform</name>
+		<defaultkeyserverurl>http://localhost:8080/platform/keyserver/</defaultkeyserverurl>
+		<defaultkeyservername>keyserver</defaultkeyservername>
+</platform>
+<device>
+        <id>device</id>
+        <privilege>1</privilege>
+        <keyservername>keyserver</keyservername>
+    </device>
+<user>
+        <name>user1</name>
+        <privilege>1</privilege>
+        <keyservername>keyserver</keyservername>
+    </user>
+<service>
+        <url>http://localhost:8080/service/</url>
+        <name>service</name>
+        <privilege>1</privilege>
+        <keyservername>keyserver</keyservername>
+    </service>
+<keyserver>
+<name>keyserver</name>
+<privilege/>
+<url>http://localhost:8080/platform/keyserver/</url>
+</keyserver>
+</root>
