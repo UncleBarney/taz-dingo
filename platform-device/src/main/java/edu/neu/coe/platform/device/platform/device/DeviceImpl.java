@@ -5,10 +5,16 @@
 package edu.neu.coe.platform.device.platform.device;
 
 
-import edu.neu.coe.platform.device.platform.device.platformRequestAPI.KDCAuthenticationAPI;
-import edu.neu.coe.platform.device.platform.device.platformRequestAPI.ServiceRequestAPI;
-import edu.neu.coe.platform.device.platform.util.ConstantUtil;
+import com.tazdingo.core.Request;
+import com.tazdingo.core.Response;
+import com.tazdingo.core.util.ConstantUtil;
+import com.tazdingo.core.util.Encryption;
+import com.tazdingo.requestAPI.KDCAuthenticationAPI;
+import com.tazdingo.requestAPI.ServiceRequestAPI;
+import com.tazdingo.requestAPI.TGSAuthorizationAPI;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -25,10 +31,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import edu.neu.coe.platform.device.platform.Request;
-import edu.neu.coe.platform.device.platform.Response;
-import edu.neu.coe.platform.device.platform.device.platformRequestAPI.TGSAuthorizationAPI;
-import edu.neu.coe.platform.device.platform.util.encryption.EncryptionUtilImpl;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -61,8 +63,6 @@ public class DeviceImpl implements IDevice{
     private String encryptedusername=null;
     private SecretKey localkey=null;
     
-    private final EncryptionUtilImpl helper=new EncryptionUtilImpl();
-    
 /**
  * 
  * @param devicename
@@ -71,14 +71,19 @@ public class DeviceImpl implements IDevice{
  * @param defaultplatformurl 
  */
     public DeviceImpl(String devicename,String devicepassword,String adminpassword,String defaultplatformurl){
-        SecretKey key=helper.generateSecretKey(adminpassword);
-        String encryptedpassword=helper.encrypt(key, devicepassword);
+        SecretKey key=Encryption.generateSecretKey(adminpassword);
+        String encryptedpassword=Encryption.encrypt(key, devicepassword);
         constructer=new DeviceConstructer(devicename, encryptedpassword);
         isblocked=false;
         this.defaultplatformurl=defaultplatformurl;
-        data=new File("./src/data.xml");
+        data=new File("data.xml");
         try {
             data.createNewFile();
+            String content="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><root>\n</root>";
+            FileWriter fw = new FileWriter(data.getAbsoluteFile());
+	    BufferedWriter bw = new BufferedWriter(fw);
+	    bw.write(content);
+	    bw.close();
         } catch (IOException ex) {
             Logger.getLogger(DeviceImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -118,7 +123,7 @@ public class DeviceImpl implements IDevice{
     public DeviceImpl(String devicename,String password,String defaultplatformurl){
         constructer=new DeviceConstructer(devicename, password);
         this.defaultplatformurl=defaultplatformurl;
-        data=new File("./src/data.xml");
+        data=new File("data.xml");
         readFile();
     }
     
@@ -183,12 +188,12 @@ public class DeviceImpl implements IDevice{
         Response response=sendRequest(request);
         System.out.println();
         System.out.println("Device get response from Platform");
-        SecretKey pkey=helper.generateSecretKey(adminpassword);
-        String decryptedpassoword=helper.decrypt(pkey, constructer.getDevicePassword());
+        SecretKey pkey=Encryption.generateSecretKey(adminpassword);
+        String decryptedpassoword=Encryption.decrypt(pkey, constructer.getDevicePassword());
          if(decryptedpassoword.equals(ConstantUtil.WRONDKEY)){
             status=ConstantUtil.WRONGPASSWORD;
         }else{
-        SecretKey key=helper.generateSecretKey(decryptedpassoword);
+        SecretKey key=Encryption.generateSecretKey(decryptedpassoword);
         localkey=key;
         Map<String,String> data=response.getData();
         String error=data.get(ConstantUtil.ERROR);
@@ -198,7 +203,7 @@ public class DeviceImpl implements IDevice{
         if(error.equals(ConstantUtil.NO_ERROR)){
         data.remove(ConstantUtil.ERROR);
         System.out.println("Decrpted data with key:"+pkey);
-        data=helper.decrypt(pkey,data);
+        data=Encryption.decrypt(pkey,data);
         if(!data.containsKey(ConstantUtil.ERROR)){
         devicesessionid=data.get(ConstantUtil.SESSIONID);
         deviceticket=data.get(ConstantUtil.TICKET);
@@ -230,8 +235,8 @@ public class DeviceImpl implements IDevice{
          if(username==null || username.isEmpty() || password==null ||password.isEmpty() && isblocked)
             return ConstantUtil.WRONGPASSWORD;
          String status=ConstantUtil.WRONGPASSWORD;
-         SecretKey key=helper.generateSecretKey(password);
-         String storedusername=helper.decrypt(key, encryptedusername);
+         SecretKey key=Encryption.generateSecretKey(password);
+         String storedusername=Encryption.decrypt(key, encryptedusername);
          if(storedusername.equals(username))
          status=ConstantUtil.SUCCESS_LOGIN;
          return status;
@@ -257,7 +262,7 @@ public class DeviceImpl implements IDevice{
         Response response=sendRequest(request);
         System.out.println();
         System.out.println("User get Response from platform");
-        SecretKey key=helper.generateSecretKey(password);
+        SecretKey key=Encryption.generateSecretKey(password);
         Map<String,String> data=response.getData();
         String error=data.get(ConstantUtil.ERROR);
         if(error==null) status=ConstantUtil.NO_RESPONSE;
@@ -266,7 +271,7 @@ public class DeviceImpl implements IDevice{
         if(error.equals(ConstantUtil.NO_ERROR)){
         data.remove(ConstantUtil.ERROR);
         System.out.println("decrpted data with key:"+key);
-        data=helper.decrypt(key, data);
+        data=Encryption.decrypt(key, data);
         if(data.containsKey(ConstantUtil.ERROR)){
             status=ConstantUtil.WRONGPASSWORD;
         }else{
@@ -275,7 +280,7 @@ public class DeviceImpl implements IDevice{
         userticket=data.get(ConstantUtil.TICKET);
         userstepid=data.get(ConstantUtil.STEPID);
         status=ConstantUtil.SUCCESS_LOGIN;
-        encryptedusername=helper.encrypt(key, username);
+        encryptedusername=Encryption.encrypt(key, username);
             saveToFile(ConstantUtil.ENCRPTEDUSERNAME, encryptedusername);
             saveToFile(ConstantUtil.USERNAME, username);
             
@@ -299,7 +304,7 @@ public class DeviceImpl implements IDevice{
     public Map<String,String> sendGeneralServiceRequest(String servicename,Map<String,String> additionalInformation){
         if(!isblocked){
         String status=ConstantUtil.DEFAULT_ERROR;
-        SecretKey key=helper.stringToKey(userstepid);
+        SecretKey key=Encryption.stringToKey(userstepid);
         if(key!=null){
         System.out.println();
         Request request=ServiceRequestAPI.connectServiceRequest(username, constructer.getDeviceId(),servicename,additionalInformation);
@@ -317,7 +322,7 @@ public class DeviceImpl implements IDevice{
         if(error.equals(ConstantUtil.NO_ERROR)){
         data.remove(ConstantUtil.ERROR);
         System.out.println("decrpted data with key:"+key);
-        data=helper.decrypt(key, data);
+        data=Encryption.decrypt(key, data);
         if(data.containsKey(ConstantUtil.ERROR)){
             status=ConstantUtil.INVALIDSTEPID;
         }else{
@@ -351,7 +356,7 @@ public class DeviceImpl implements IDevice{
     public String connectToService(String servicename){
         if(!isblocked){
         String status=ConstantUtil.DEFAULT_ERROR;
-        SecretKey key=helper.stringToKey(userstepid);
+        SecretKey key=Encryption.stringToKey(userstepid);
         if(key!=null){
         System.out.println();
         Request request=ServiceRequestAPI.connectServiceRequest(username, constructer.getDeviceId(),servicename);
@@ -369,7 +374,7 @@ public class DeviceImpl implements IDevice{
         if(error.equals(ConstantUtil.NO_ERROR)){
         data.remove(ConstantUtil.ERROR);
         System.out.println("decrpted data with key:"+key);
-        data=helper.decrypt(key, data);
+        data=Encryption.decrypt(key, data);
         if(data.containsKey(ConstantUtil.ERROR)){
             return ConstantUtil.INVALIDSTEPID;
         }else{
@@ -399,7 +404,7 @@ public class DeviceImpl implements IDevice{
     public String userAuthorization(){
         if(!isblocked){
         String status=ConstantUtil.DEFAULT_ERROR;
-        SecretKey key=helper.stringToKey(userstepid);
+        SecretKey key=Encryption.stringToKey(userstepid);
         if(key!=null){
         Request request=TGSAuthorizationAPI.createUserAuthorizationRequest(username, constructer.getDeviceId());
         System.out.println();
@@ -416,7 +421,7 @@ public class DeviceImpl implements IDevice{
         if(error.equals(ConstantUtil.NO_ERROR)){
         data.remove(ConstantUtil.ERROR);
         System.out.println("decrpted data with key:"+key);
-        data=helper.decrypt(key, data);
+        data=Encryption.decrypt(key, data);
         if(data.containsKey(ConstantUtil.ERROR)){
             return ConstantUtil.INVALIDSTEPID;
         }else{
@@ -445,7 +450,7 @@ public class DeviceImpl implements IDevice{
     public String deviceAuthorization(){
         if(!isblocked){
         String status=ConstantUtil.DEFAULT_ERROR;
-        SecretKey key=helper.stringToKey(devicestepid);
+        SecretKey key=Encryption.stringToKey(devicestepid);
         if(key!=null){
         Request request=TGSAuthorizationAPI.createDeviceAuthorizationRequest(constructer.getDeviceId());
         System.out.println();
@@ -462,7 +467,7 @@ public class DeviceImpl implements IDevice{
         if(error.equals(ConstantUtil.NO_ERROR)){
         data.remove(ConstantUtil.ERROR);
         System.out.println("decrpted data with key:"+key);
-        data=helper.decrypt(key, data);
+        data=Encryption.decrypt(key, data);
         if(data.containsKey(ConstantUtil.ERROR)){
             return ConstantUtil.INVALIDSTEPID;
         }else{
@@ -485,7 +490,7 @@ public class DeviceImpl implements IDevice{
       
     private Request encryptRequest(Request request,SecretKey key,String ticket,String type){
         Map<String,String> data=request.getData();
-        data=helper.encrypt(key, data);
+        data=Encryption.encrypt(key, data);
         data.put(ConstantUtil.TICKET, ticket);
         data.put(ConstantUtil.TICKET_TYPE, type);
         request.setData(data);
@@ -605,12 +610,12 @@ public class DeviceImpl implements IDevice{
     */
     @Override
     public SecretKey getLocalKey(String adminpassword){
-        SecretKey pkey=helper.generateSecretKey(adminpassword);
-        String decryptedpassoword=helper.decrypt(pkey, constructer.getDevicePassword());
+        SecretKey pkey=Encryption.generateSecretKey(adminpassword);
+        String decryptedpassoword=Encryption.decrypt(pkey, constructer.getDevicePassword());
          if(decryptedpassoword.equals(ConstantUtil.WRONDKEY)){
             return null;
         }else{
-             localkey=helper.generateSecretKey(decryptedpassoword);
+             localkey=Encryption.generateSecretKey(decryptedpassoword);
         return localkey;
          }
     }

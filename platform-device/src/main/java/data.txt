@@ -1,7 +1,0 @@
-DeviceSessionID:8334103590984279082
-DeviceTicket:aEfU6D/Gx/Vvx7p4u11jgjeBU55Jh9Ohdh8xyOE/NPOVOYLh2BOmuYzVK4huRw/R1kjQxbG1wEj1
-WReFvSH6VAJBUNto932cFpL1YBQuH1RnE4o3zylAd43wyFJ3F/rlmEjNMgEAfgYB44+X+9eJlg==
-+UDxCFXT1w==
-DeviceStepID:PiRmnJq1oxzJWnmCZTIR/g==
-encrptedusername:a68Y/6QHTemO/5fiae+aPg==
-Username:user
