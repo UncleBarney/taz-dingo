@@ -4,8 +4,13 @@
  */
 package edu.neu.coe.platform.service.serviceserver.GeneralServer;
 
-import edu.neu.coe.platform.service.util.ConstantUtil;
-import edu.neu.coe.platform.service.util.encryption.IEncryptionUtil;
+import com.tazdingo.core.Request;
+import com.tazdingo.core.Response;
+import com.tazdingo.core.ServiceWorkRequest;
+import com.tazdingo.core.WorkQueue;
+import com.tazdingo.core.WorkRequest;
+import com.tazdingo.core.util.ConstantUtil;
+import com.tazdingo.core.util.Encryption;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -15,16 +20,9 @@ import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import edu.neu.coe.platform.service.platform.Request;
-import edu.neu.coe.platform.service.platform.Response;
-import edu.neu.coe.platform.service.platform.platformRequestAPI.KDCAuthenticationAPI;
-import edu.neu.coe.platform.service.platform.platformRequestAPI.TGSAuthorizationAPI;
-import edu.neu.coe.platform.service.platform.ticket.ServiceTicket;
-
-import edu.neu.coe.platform.service.platform.workrequest.WorkQueue;
-import edu.neu.coe.platform.service.platform.workrequest.ServiceWorkRequest;
-import edu.neu.coe.platform.service.platform.workrequest.WorkRequest;
-import edu.neu.coe.platform.service.util.encryption.EncryptionUtilImpl;
+import com.tazdingo.requestAPI.KDCAuthenticationAPI;
+import com.tazdingo.requestAPI.TGSAuthorizationAPI;
+import com.tazdingo.ticket.ServiceTicket;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -40,7 +38,6 @@ public abstract class Server implements IServer{
      protected WorkQueue workqueue=new WorkQueue();
      protected String sessionid;
      protected ServerConstructor constructor;
-     protected IEncryptionUtil helper=new EncryptionUtilImpl();
      protected String stepid;
      protected String kdcticket;
      protected String tgt;
@@ -70,14 +67,14 @@ public abstract class Server implements IServer{
             if(servicekey!=null){
             System.out.println("decrypted ticket with key:"+servicekey);
             
-         String decrptedTicket=helper.decrypt(servicekey, ticket);
+         String decrptedTicket=Encryption.decrypt(servicekey, ticket);
          if(!decrptedTicket.equals(ConstantUtil.WRONDKEY)){
          ServiceTicket serviceticket=new ServiceTicket(decrptedTicket);
          request.getData().remove(ConstantUtil.TICKET);
-         SecretKey tempKey=helper.stringToKey(serviceticket.getStepid());
+         SecretKey tempKey=Encryption.stringToKey(serviceticket.getStepid());
          System.out.println("decrypted data with key:"+tempKey);
          
-         request.setData(helper.decrypt(tempKey, request.getData()));
+         request.setData(Encryption.decrypt(tempKey, request.getData()));
          request.getData().put(ConstantUtil.TICKET, decrptedTicket);
         if(validateTicket(serviceticket, getIdentifier(request.getData()))){
             String operation=request.getData().get(ConstantUtil.OPERATION);
@@ -86,7 +83,7 @@ public abstract class Server implements IServer{
         if(usersessionid==null)usersessionid=serviceticket.getKdcticket().getSessionID();
         if(usersessionid==null)usersessionid=sessionid;
             WorkRequest workRequest=new ServiceWorkRequest(usersessionid,request);
-        ((ServiceWorkRequest)workRequest).setTempkey(helper.keyToString(tempKey));
+        ((ServiceWorkRequest)workRequest).setTempkey(Encryption.keyToString(tempKey));
       
         workqueue.addWorkRequest(usersessionid, workRequest);
         return excuteRequest(usersessionid);
@@ -119,9 +116,9 @@ public abstract class Server implements IServer{
     protected abstract Response excuteRequest(String usersessionid);
 
     public Server(String servername,String serverpassword,String adminpassword,String defaultplatformurl) {
-        SecretKey key=helper.generateSecretKey(adminpassword);
-        String encryptedpassword=helper.encrypt(key, serverpassword);
-        serverkey=helper.generateSecretKey(serverpassword);
+        SecretKey key=Encryption.generateSecretKey(adminpassword);
+        String encryptedpassword=Encryption.encrypt(key, serverpassword);
+        serverkey=Encryption.generateSecretKey(serverpassword);
         this.defaultplatformurl=defaultplatformurl;
         constructor=new ServerConstructor(servername, encryptedpassword);
     }
@@ -149,7 +146,7 @@ public abstract class Server implements IServer{
         if(error.equals(ConstantUtil.NO_ERROR)){
         data.remove(ConstantUtil.ERROR);
         System.out.println("decrypted data with key:"+key);
-        data=helper.decrypt(key, data);
+        data=Encryption.decrypt(key, data);
         if(data.containsKey(ConstantUtil.ERROR)){
             status=ConstantUtil.INVALIDPLATFORM;
         }else{
@@ -175,7 +172,7 @@ public abstract class Server implements IServer{
      @Override
     public String serverAuthorization(){
         String status=ConstantUtil.DEFAULT_ERROR;
-        SecretKey key=helper.stringToKey(stepid);
+        SecretKey key=Encryption.stringToKey(stepid);
         if(key!=null){
         Request request=TGSAuthorizationAPI.createServerAuthorizationRequest(constructor.getServerid());
         System.out.println();
@@ -193,7 +190,7 @@ public abstract class Server implements IServer{
         if(error.equals(ConstantUtil.NO_ERROR)){
             System.out.println("decrypted data with key"+key);
             data.remove(ConstantUtil.ERROR);
-        data=helper.decrypt(key, data); 
+        data=Encryption.decrypt(key, data); 
         if(data.containsKey(ConstantUtil.ERROR)){
             status=ConstantUtil.INVALIDSTEPID;
         }else{
@@ -217,7 +214,7 @@ public abstract class Server implements IServer{
      protected Request encryptRequest(Request request,SecretKey key,String ticket,String type){
         Map<String,String> data=request.getData();
         System.out.println("encrypted data with key:"+key);
-        data=helper.encrypt(key, data);
+        data=Encryption.encrypt(key, data);
         data.put(ConstantUtil.TICKET, ticket);
         data.put(ConstantUtil.TICKET_TYPE, type);
         request.setData(data);
