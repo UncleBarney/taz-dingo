@@ -38,6 +38,7 @@ public class ConstantUtil {
     public final static String USERSSIONID = "UserSessionID";
     public final static String USERSSTEPID = "UserStepID";
     public final static String CREATED_DATE = "CreatedDate";
+    public final static String ENCRPTEDUSERNAME="encryptedusername";
     //response
     public final static String NO_ERROR = "None";
     public final static String ERROR = "error";
@@ -95,6 +96,8 @@ public class ConstantUtil {
     public final static String WRONGPASSWORD = "wrong password";
     public final static String PASSWORDRESET = "reset password";
     public final static String INVALIDSESSION = "invalid session";
+    public final static String INVALIDSTEPID="invalid stepid";
+    public final static String LACKOFPRIVILEGE="lack of privilege";
     //Data
     public final static String DATA = "Data";
     public final static String SERVICE_TICKET_PACKET_DEVICEID = "SERVICE_TICKET_PACKET_DEVICEID";

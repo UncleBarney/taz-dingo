@@ -8,14 +8,15 @@ import org.apache.commons.configuration.XMLConfiguration;
 /**
  * @author Administrator
  */
-public class Test {
+public class Config {
 
-    public static void main(String[] args) {
+    public static XMLConfiguration config(String path) {
+         XMLConfiguration config=null;
         try {
-            XMLConfiguration config = new XMLConfiguration("../conf/device.xml");
-            System.out.println(config.getString("device.id"));
+            config= new XMLConfiguration(path);
         } catch (ConfigurationException ex) {
-            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return config;
     }
 }
