@@ -1,8 +1,5 @@
 package com.tazdingo.core;
 
-import com.tazdingo.core.WorkRequest;
-import com.tazdingo.core.Request;
-
 /**
  *
  * @author Cynthia
