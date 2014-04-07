@@ -58,6 +58,7 @@ public class KeyServer extends Server implements IKeyServer{
     public KeyServer(String keyservername,String keyserverpassword,String adminpassword,String defaultplatformurl,String keystorefilespath,String defaultplatformname){
         super(keyservername, keyserverpassword, adminpassword,defaultplatformurl);
         this.defaultplatformname=defaultplatformname;
+        addPlatformPrivilege(defaultplatformname, "1");
         masterKey=Encryption.generateSecretKey(keyserverpassword);
         kdc=new KeyServerKDC(masterKey,keystorefilespath);
         tgs=new KeyServerTGS(masterKey);
