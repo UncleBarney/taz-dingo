@@ -43,8 +43,9 @@ public abstract class AbstractPlatformConfig {
      */
     public IPlatform defaultPlatformConfiguration() {
         IPlatform platform=null;
+        Scanner scanIn = null;
         try {
-            File fXmlFile = new File("./src/platform.xml");
+            File fXmlFile = new File("./src/main/java/platform.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -58,12 +59,12 @@ public abstract class AbstractPlatformConfig {
                     String platformname=element.getElementsByTagName("name").item(0).getTextContent();
                     String defaultkeyserverurl=element.getElementsByTagName("defaultkeyserverurl").item(0).getTextContent();
                     String defaultkeyservername=element.getElementsByTagName("defaultkeyservername").item(0).getTextContent();
-                    Scanner scanIn = new Scanner(System.in);
+                    scanIn = new Scanner(System.in);
                     String password=null;
                     System.out.println("Enter platform adminpassword:");
                     String adminpassword=scanIn.next();
                     NodeList keylist=doc.getElementsByTagName("key");
-                    scanIn.close();
+                   
                     if(keylist.getLength()==0){
                         System.out.println("Enter password:");
                         password=scanIn.next();
@@ -159,6 +160,9 @@ public abstract class AbstractPlatformConfig {
             Logger.getLogger(AbstractPlatformConfig.class.getName()).log(Level.SEVERE, null, ex);
         } catch (TransformerException ex) {
             Logger.getLogger(AbstractPlatformConfig.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally{
+        	 scanIn.close();
         }
             
             return platform;
