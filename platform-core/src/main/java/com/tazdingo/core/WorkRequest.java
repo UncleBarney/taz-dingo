@@ -1,7 +1,7 @@
 package com.tazdingo.core;
 
 /**
- *
+ * 
  * @author Cynthia
  */
 public abstract class WorkRequest {

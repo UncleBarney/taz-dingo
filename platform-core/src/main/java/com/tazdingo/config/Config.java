@@ -6,10 +6,17 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 
 /**
- * @author Administrator
+ * @author Hechen Gao
  */
 public class Config {
 
+    /**
+     * Get the instance of org.apache.commons.configuration.XMLConfiguration
+     * in order the get the attributes in the configuration file.
+     * 
+     * @param path, the path to the configuration file
+     * @return 
+     */
     public static XMLConfiguration config(String path) {
          XMLConfiguration config=null;
         try {
