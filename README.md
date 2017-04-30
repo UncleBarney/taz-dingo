@@ -6,11 +6,11 @@ An authentication platform for mobile devices and enterprise web services
 
 ![alt text](http://wow.zamimg.com/images/hearthstone/cards/enus/animated/CS2_179_premium.gif "Taz Dingo!!")
 
-##What is Taz-dingo
+## What is Taz-dingo
 Taz-dingo is a distributed authentication platform that connects user devices and enterprise web services.
 Implemented based on [Kerberos protocol](https://en.wikipedia.org/wiki/Kerberos_(protocol)).
 
-##Development note
+## Development note
 * **Source tree**
 	* master - The default branch
 	* gh-pages - Branch for project site
